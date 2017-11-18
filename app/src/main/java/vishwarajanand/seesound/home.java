@@ -43,8 +43,7 @@ public class home extends AppCompatActivity {
                                            String permissions[], int[] grantResults) {
         if (requestCode == 101 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             // This method is called when the  permissions are given
-            AudioRecieve audio = new AudioRecieve();
-            audio.startMic();
+            toast("Started listening to audio.");
         }
     }
 
@@ -58,5 +57,10 @@ public class home extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         audio.stopMic();
+    }
+
+    private void toast(String message){
+        Toast.makeText(getApplicationContext(), message,
+                Toast.LENGTH_SHORT).show();
     }
 }

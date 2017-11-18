@@ -42,30 +42,27 @@ public class AudioRecieve {
                 Log.i(LOG_TAG, "Send thread started. Thread id: " + Thread.currentThread().getId());
 
 
-                int SAMPLE_RATE = 0; // Hertz
+                int[] sampleRates = new int[]{8000, 11025, 16000, 22050, 44100};
+                int sampleRate = 0; // Hertz
                 int bufferSize = 0;
+                AudioRecord audioRecorder = null;
 
-
-                for (int rate : new int[] {48000, 44100, 22050, 11025, 16000, 8000}) {  // add the rates you wish to check against
-                    SAMPLE_RATE = rate;
-                    bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-                    if(bufferSize <= 0){
-                        Log.d(LOG_TAG, "bufferSize " + bufferSize + " for rate " + SAMPLE_RATE + " is not supported!");
-                        continue;
-                    }
-                    else{
-                        break;
-                    }
+                for (int i = 0;
+                     (bufferSize <= 0 || audioRecorder == null)
+                             && (i < sampleRates.length);
+                     i++) {
+                    // add the rates you wish to check against
+                    sampleRate = sampleRates[i];
+                    bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT);
+                    audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
+                            AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT,
+                            bufferSize);
                 }
 
-                if(bufferSize <= 0){
+                if (bufferSize <= 0 || audioRecorder == null) {
                     Log.e(LOG_TAG, "No good bufferSize is found to be supported!");
                     return;
                 }
-
-                AudioRecord audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
-                        AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
-                        bufferSize);
 
                 final short[] audioData = new short[bufferSize];
                 final int finalBufferSize = bufferSize;
@@ -78,31 +75,28 @@ public class AudioRecieve {
                         //like 1073, 919, 1001, 1185, 1204 milliseconds of time.
                         Log.d(LOG_TAG, "periodic notification " + d.toLocaleString() + " mili " + d.getTime());
                         recorder.read(audioData, 0, finalBufferSize);
-
-                        //do something amazing with audio data
                     }
 
                     @Override
                     public void onMarkerReached(AudioRecord recorder) {
                         Log.d(LOG_TAG, "Marker reached");
+
+                        double rms = 0;
+
+                        //do something amazing with audio data
+                        for (int i = 0; i < audioData.length; i++) {
+                            rms += audioData[i]*audioData[i];
+                        }
+                        rms /= audioData.length*1.0;
+                        rms = Math.sqrt(rms);
+                        Log.i(LOG_TAG, "Updater: " + rms);
                     }
                 };
 
-
-                //aim for 1 second
-                int detectAfterEvery = (int) ((float) SAMPLE_RATE * 1.0f);
-
-                if (detectAfterEvery > bufferSize) {
-                    Log.w(LOG_TAG, "Increasing buffer to hold enough samples " + detectAfterEvery + " was: " + bufferSize);
-                    bufferSize = detectAfterEvery;
-                }
-
                 audioRecorder.setRecordPositionUpdateListener(positionUpdater);
-                audioRecorder.setPositionNotificationPeriod(10000);
-                audioRecorder.setNotificationMarkerPosition(1000);
 
                 Log.d(LOG_TAG, "Start recording, bufferSize: " + bufferSize);
-                if(audioRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
+                if (audioRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
                     Log.e(LOG_TAG, "Audio Recorder could not be initialized");
                     return;
                 }
@@ -111,8 +105,11 @@ public class AudioRecieve {
                 // have a read loop otherwise the listener won't trigger
                 while (mic) {
                     Log.v(LOG_TAG, "Audio thread running. Thread id: " + Thread.currentThread().getId());
+                    audioRecorder.setNotificationMarkerPosition(1000);
                     audioRecorder.read(audioData, 0, bufferSize);
                 }
+
+                audioRecorder.release();
             }
         });
         thread.start();
