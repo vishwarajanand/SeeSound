@@ -105,7 +105,7 @@ public class AudioRecieve {
                 // have a read loop otherwise the listener won't trigger
                 while (mic) {
                     Log.v(LOG_TAG, "Audio thread running. Thread id: " + Thread.currentThread().getId());
-                    audioRecorder.setNotificationMarkerPosition(1000);
+                    audioRecorder.setNotificationMarkerPosition(400);
                     audioRecorder.read(audioData, 0, bufferSize);
                 }
 
