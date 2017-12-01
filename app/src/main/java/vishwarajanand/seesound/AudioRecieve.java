@@ -4,22 +4,14 @@ package vishwarajanand.seesound;
  * Created by dabba on 15/11/17.
  */
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Date;
-
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
-import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-public class AudioRecieve {
+import java.util.Date;
+
+class AudioRecieve {
 
     private static final String LOG_TAG = "AudioRecieve";
     private boolean mic = false; // Enable mic?
