@@ -25,7 +25,7 @@ public class home extends AppCompatActivity {
         public void run() {
             handler.postDelayed(this, 50);
             int maxAmplitude = recorder.getMaxAmplitude();
-            if (maxAmplitude != 0) {
+            if (maxAmplitude > 0) {
                 visualizerView.addAmplitude(maxAmplitude);
             }
         }

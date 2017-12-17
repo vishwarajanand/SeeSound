@@ -34,7 +34,7 @@ public class Colors {
         colorChangeFrameSeq = colorChangeFrameRate;
         LinePaint.setColor(randomColor());
         PointPaint.setColor(randomColor());
-        CanvasPaint.setColor(randomColor());
+        //CanvasPaint.setColor(randomColor());
     }
 
     private int randomColor(){
