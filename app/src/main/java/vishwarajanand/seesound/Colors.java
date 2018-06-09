@@ -16,7 +16,7 @@ public class Colors {
     public Paint PointPaint;
     public Paint CanvasPaint;
 
-    public Colors(){
+    public Colors() {
         LinePaint = new Paint();
         LinePaint.setStrokeWidth(1);
         LinePaint.setColor(Color.GREEN);
@@ -27,8 +27,8 @@ public class Colors {
         CanvasPaint.setColor(Color.WHITE);
     }
 
-    public void shuffle(){
-        if(colorChangeFrameSeq-- >= 0){
+    public void shuffle() {
+        if (colorChangeFrameSeq-- >= 0) {
             return;
         }
         colorChangeFrameSeq = colorChangeFrameRate;
@@ -37,11 +37,11 @@ public class Colors {
         //CanvasPaint.setColor(randomColor());
     }
 
-    private int randomColor(){
+    private int randomColor() {
         Random rand = new Random();
         int r = rand.nextInt(255);
         int g = rand.nextInt(255);
         int b = rand.nextInt(255);
-        return Color.rgb(r,g,b);
+        return Color.rgb(r, g, b);
     }
 }

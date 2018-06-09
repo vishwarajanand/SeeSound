@@ -7,7 +7,7 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Window;
@@ -24,9 +24,11 @@ public class home extends AppCompatActivity {
     final Runnable updater = new Runnable() {
         public void run() {
             handler.postDelayed(this, 50);
-            int maxAmplitude = recorder.getMaxAmplitude();
-            if (maxAmplitude > 0) {
-                visualizerView.addAmplitude(maxAmplitude);
+            if (recorder != null && visualizerView != null) {
+                int maxAmplitude = recorder.getMaxAmplitude();
+                if (maxAmplitude > 0) {
+                    visualizerView.addAmplitude(maxAmplitude);
+                }
             }
         }
     };
@@ -37,46 +39,62 @@ public class home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        requestRecordAudioPermission();
         setContentView(R.layout.activity_home);
         visualizerView = (VisualizerView) findViewById(R.id.visualizer);
-        try {
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile("/dev/null");
-            recorder.prepare();
-            recorder.start();
-        } catch (IllegalStateException | IOException ignored) {
-            Log.e(LOG_TAG, "Ignoring exception while initializing audio record: ", ignored);
-        }
+        requestRecordAudioPermission();
     }
 
     private void requestRecordAudioPermission() {
-        String requiredPermission = Manifest.permission.RECORD_AUDIO;
 
-        // If the user previously denied this permission then show a message explaining why
-        // this permission is needed
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), requiredPermission) ==
-                    PackageManager.PERMISSION_GRANTED) {
-                // put your code for Version>=Marshmallow
+            String requiredPermission = Manifest.permission.RECORD_AUDIO;
+            int result = getApplicationContext().checkCallingOrSelfPermission(requiredPermission);
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                toast("Microphone permission granted!");
+                startAudioRecorder();
             } else {
-                if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
-                    Toast.makeText(this,
-                            "App required access to audio", Toast.LENGTH_SHORT).show();
-                }
-                requestPermissions(new String[]{requiredPermission}, 101);
+                toast("Microphone permission not granted");
+                // request permissions
+                ActivityCompat.requestPermissions(this, new String[]{requiredPermission}, 101);
             }
+        } else {
+            Log.e(LOG_TAG, "Old android phone, permissions isnt handled in code.");
+            toast("Permissions would be handled on app initialize!");
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-        if (requestCode == 101 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        // TODO: [MinSdkUpgrade] Change permission check to Arrays.stream(grantResults).allMatch(x -> x == PackageManager.PERMISSION_GRANTED)
+        if (requestCode == 101 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             // This method is called when the  permissions are given
+            Log.e(LOG_TAG, "Permissions granted successfully, starting audio");
+            startAudioRecorder();
+        } else {
+            toast("Problem with permissions!");
+            // TODO: This may cause unintended recirsive depth and hence an app crash.
+            if (grantResults.length > 0) {
+                Log.e(LOG_TAG, "Rechecking app permissions.");
+//                requestRecordAudioPermission();
+            } else {
+                Log.e(LOG_TAG, "All permissions failed, hence exiting app.");
+                finish();
+            }
+        }
+    }
+
+    private void startAudioRecorder() {
+        try {
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOutputFile("/dev/null");
+            recorder.prepare();
             toast("Started listening to audio.");
+            recorder.start();
+        } catch (IllegalStateException | IOException ex) {
+            Log.e(LOG_TAG, "Exception while initializing audio record: ", ex);
         }
     }
 
@@ -95,7 +113,7 @@ public class home extends AppCompatActivity {
         handler.post(updater);
     }
 
-    private void toast(String message){
+    private void toast(String message) {
         Toast.makeText(getApplicationContext(), message,
                 Toast.LENGTH_SHORT).show();
     }
