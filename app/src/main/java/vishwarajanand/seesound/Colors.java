@@ -13,16 +13,16 @@ public class Colors {
     private static final int colorChangeFrameRate = 20;
     private static int colorChangeFrameSeq = 0;
     public Paint LinePaint;
-    public Paint PointPaint;
+    public Paint CirclePaint;
     public Paint CanvasPaint;
 
     public Colors() {
         LinePaint = new Paint();
         LinePaint.setStrokeWidth(1);
         LinePaint.setColor(Color.GREEN);
-        PointPaint = new Paint();
-        PointPaint.setStrokeWidth(2);
-        PointPaint.setColor(Color.GREEN);
+        CirclePaint = new Paint();
+        CirclePaint.setStrokeWidth(5);
+        CirclePaint.setColor(Color.GREEN);
         CanvasPaint = new Paint();
         CanvasPaint.setColor(Color.WHITE);
     }
@@ -33,7 +33,7 @@ public class Colors {
         }
         colorChangeFrameSeq = colorChangeFrameRate;
         LinePaint.setColor(randomColor());
-        PointPaint.setColor(randomColor());
+        CirclePaint.setColor(randomColor());
         //CanvasPaint.setColor(randomColor());
     }
 

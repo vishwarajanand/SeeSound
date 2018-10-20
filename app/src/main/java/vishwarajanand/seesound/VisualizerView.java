@@ -48,6 +48,6 @@ public class VisualizerView extends View {
         canvas.drawPaint(colors.CanvasPaint);
         canvas.drawLines(vectors.getIndexedArray(0), colors.LinePaint);
         canvas.drawLine(width / 2, height, width / 2, 0, colors.LinePaint);
-        canvas.drawPoints(amplitudes.getIndexedArray(this.width / 2), colors.PointPaint);
+        canvas.drawPoints(amplitudes.getIndexedArray(this.width / 2), colors.CirclePaint);
     }
 }
