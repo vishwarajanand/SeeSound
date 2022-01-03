@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="vishwarajanand.seesound.home"
-    android:id="@+id/PLAY_PARENT"
-    android:padding="0dp">
+    android:padding="0dp"
+    tools:context="vishwarajanand.seesound.home">
 
-    <vishwarajanand.seesound.VisualizerView
-        android:id="@+id/visualizer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+  <vishwarajanand.seesound.VisualizerView
+      android:id="@+id/visualizer"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
