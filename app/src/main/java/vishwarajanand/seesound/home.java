@@ -47,7 +47,7 @@ public class home extends AppCompatActivity {
     this.requestWindowFeature(Window.FEATURE_NO_TITLE);
     super.onCreate(savedInstanceState);
     // TODO: Check abt this, it's a upgrade legacy code which has stopped working!
-    getSupportActionBar().hide();
+    // getSupportActionBar().hide();
     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     setContentView(R.layout.activity_home);
     visualizerView = (VisualizerView) findViewById(R.id.visualizer);
