@@ -28,7 +28,14 @@ public class home extends AppCompatActivity  {
         public void run() {
             handler.postDelayed(this, 50);
             if (recorder != null && visualizerView != null) {
-                int maxAmplitude = recorder.getMaxAmplitude();
+                int maxAmplitude = 0;
+                try{
+                    maxAmplitude = recorder.getMaxAmplitude();
+                } catch (IllegalStateException ex) {
+                    Log.e(LOG_TAG, "Exception while recording microphone: ", ex);
+                } catch (RuntimeException rex) {
+                    Log.e(LOG_TAG, "Runtime Exception while recording microphone: ", rex);
+                }
                 if (maxAmplitude > 0) {
                     visualizerView.addAmplitude(maxAmplitude);
                 }
@@ -77,7 +84,7 @@ public class home extends AppCompatActivity  {
             startAudioRecorder();
         } else {
             toast("Problem with permissions!");
-            // TODO: This may cause unintended recirsive depth and hence an app crash.
+            // TODO: This may cause unintended recursive depth and hence an app crash.
             if (grantResults.length > 0) {
                 Log.e(LOG_TAG, "Rechecking app permissions.");
 //                requestRecordAudioPermission();
@@ -99,6 +106,8 @@ public class home extends AppCompatActivity  {
             recorder.start();
         } catch (IllegalStateException | IOException ex) {
             Log.e(LOG_TAG, "Exception while initializing audio record: ", ex);
+        } catch (RuntimeException rex) {
+            Log.e(LOG_TAG, "Runtime Exception while initializing audio record: ", rex);
         }
     }
 

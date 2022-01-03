@@ -6,8 +6,8 @@ android {
         applicationId "vishwarajanand.seesound"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 5
-        versionName "5.0"
+        versionCode 6
+        versionName "6.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
