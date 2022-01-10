@@ -24,9 +24,9 @@ public class VisualizerView extends View {
     }
 
     @Override
-    protected void onSizeChanged(int width, int h, int oldw, int oldh) {
+    protected void onSizeChanged(int width, int height, int oldw, int oldh) {
         this.width = width;
-        this.height = h;
+        this.height = height;
         //show wave(amplitudes) and bar(vectors) graph in split width windows, effective width = width/2
         this.amplitudes = new PointsCircularIndexedArray(this.width / 2, 1); // xy for each point across the half-screen width
         this.vectors = new PointsCircularIndexedArray(this.width / 2, 2); // x0 y0 x1 y1 for each line across the half-screen width

@@ -9,8 +9,8 @@ public class PointsCircularIndexedArray {
     final int bufferSize, numElements, numPointsPerElement, numValuesPerPoint;
     int currentPos;
 
-    PointsCircularIndexedArray(int numElelemnts, int numPointsPerElement) {
-        this(numElelemnts, numPointsPerElement, 2);
+    PointsCircularIndexedArray(int numElements, int numPointsPerElement) {
+        this(numElements, numPointsPerElement, 2);
     }
 
     PointsCircularIndexedArray(int numElements, int numPointsPerElement, int numValuesPerPoint) {

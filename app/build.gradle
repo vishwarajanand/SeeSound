@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+//import com.android.build.OutputFile
+//def abi = output.getFilter(com.android.build.OutputFile.ABI)
+//def abi = output.getFilter(OutputFile.ABI)
 
 android {
     compileSdkVersion 30
@@ -6,13 +9,20 @@ android {
         applicationId "vishwarajanand.seesound"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 5
-        versionName "5.0"
+        versionCode 6
+        versionName "6.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            project.ext { appName = 'SeeSound' }
+            outputFileName = "${appName}-${variant.versionName}-${variant.versionCode}.apk"
+        }
     }
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
