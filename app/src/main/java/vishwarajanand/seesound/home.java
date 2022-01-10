@@ -4,25 +4,34 @@ import android.Manifest;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import java.io.File;
 import java.io.IOException;
+
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class home extends AppCompatActivity {
 
   private final static String LOG_TAG = "home";
   //Create placeholder for user's consent to record_audio permission.
   //This will be used in handling callback
-  private final int MY_PERMISSIONS_RECORD_AUDIO = 1;
+  public static final int APP_PERMISSIONS_RECORD_AUDIO = 1;
   private VisualizerView visualizerView;
-  private MediaRecorder recorder = new MediaRecorder();
+  private MediaRecorder recorder;
   private Handler handler = new Handler();
+
+  TextView txtLbl;
   final Runnable updater = new Runnable() {
     public void run() {
       handler.postDelayed(this, 50);
@@ -30,6 +39,7 @@ public class home extends AppCompatActivity {
         int maxAmplitude = 0;
         try {
           maxAmplitude = recorder.getMaxAmplitude();
+          txtLbl.setVisibility(View.INVISIBLE);
         } catch (IllegalStateException ex) {
           Log.e(LOG_TAG, "Exception while recording microphone: ", ex);
         } catch (RuntimeException rex) {
@@ -46,15 +56,21 @@ public class home extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     this.requestWindowFeature(Window.FEATURE_NO_TITLE);
     super.onCreate(savedInstanceState);
-    // TODO: Check abt this, it's a upgrade legacy code which has stopped working!
-    // getSupportActionBar().hide();
     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     setContentView(R.layout.activity_home);
     visualizerView = (VisualizerView) findViewById(R.id.visualizer);
-    requestRecordAudioPermission();
+    txtLbl = (TextView) findViewById(R.id.app_label);
+
+    visualizerView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        //Go ahead with recording audio now
+        startAudioRecorder();
+      }
+    });
   }
 
-  private void requestRecordAudioPermission() {
+  private void RequestPermissions() {
     if (ContextCompat.checkSelfPermission(this,
         Manifest.permission.RECORD_AUDIO)
         != PackageManager.PERMISSION_GRANTED) {
@@ -67,16 +83,16 @@ public class home extends AppCompatActivity {
       // Show user dialog to grant permission to record audio
       ActivityCompat.requestPermissions(this,
           new String[]{Manifest.permission.RECORD_AUDIO},
-          MY_PERMISSIONS_RECORD_AUDIO);
+          APP_PERMISSIONS_RECORD_AUDIO);
     }
     //If permission is granted, then go ahead recording audio
     else if (ContextCompat.checkSelfPermission(this,
         Manifest.permission.RECORD_AUDIO)
         == PackageManager.PERMISSION_GRANTED) {
 
-      //Go ahead with recording audio now
-      startAudioRecorder();
     }
+    ActivityCompat.requestPermissions(home.this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE}, APP_PERMISSIONS_RECORD_AUDIO);
+
   }
 
   //Handling callback
@@ -84,32 +100,63 @@ public class home extends AppCompatActivity {
   public void onRequestPermissionsResult(int requestCode,
       String permissions[], int[] grantResults) {
     switch (requestCode) {
-      case MY_PERMISSIONS_RECORD_AUDIO: {
-        if (grantResults.length > 0
-            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-          toast("Listening to the phone audio, permission was granted, yay!");
-          startAudioRecorder();
-        } else {
-          Toast.makeText(this, "Permissions Denied to record audio", Toast.LENGTH_LONG).show();
+      case APP_PERMISSIONS_RECORD_AUDIO: {
+        if (grantResults.length > 0) {
+          boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+          boolean permissionToStore = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+          if (permissionToRecord && permissionToStore) {
+            Toast.makeText(getApplicationContext(), "Record Audio Permission Granted", Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(getApplicationContext(), "Record Audio Permission Denied", Toast.LENGTH_LONG).show();
+          }
         }
-        return;
+        break;
       }
     }
   }
+  public boolean CheckPermissions() {
+    // this method is used to check permission
+    int result = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
+    int result1 = ContextCompat.checkSelfPermission(getApplicationContext(), RECORD_AUDIO);
+    return result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED;
+  }
 
   private void startAudioRecorder() {
-    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-    recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-    recorder.setOutputFile("/dev/null");
-    try {
-      recorder.prepare();
-      toast("Started listening to audio.");
-      recorder.start();
-    } catch (IllegalStateException | IOException ex) {
-      Log.e(LOG_TAG, "Exception while initializing audio record: ", ex);
-    } catch (RuntimeException rex) {
-      Log.e(LOG_TAG, "Runtime Exception while initializing audio record: ", rex);
+    if (CheckPermissions()) {
+      recorder = new MediaRecorder();
+      // String manufacturer = Build.MANUFACTURER;
+      // if (manufacturer.toLowerCase().contains("google")) {
+      //   recorder.setAudioSource(MediaRecorder.AudioSource.UNPROCESSED);
+      // } else {
+      //   // recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
+      //   recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+      // }
+      recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+      recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+      recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+      File file = null;
+      try {
+        file = File.createTempFile("prefix", ".extension", getApplicationContext().getCacheDir());
+        recorder.setOutputFile(file);
+      } catch (IOException e) {
+        e.printStackTrace();
+        recorder.setOutputFile("/dev/null");
+      }
+      try {
+        toast("Try prepare listening to audio.");
+        recorder.prepare();
+        toast("Try start listening to audio.");
+        recorder.start();
+        toast("Started listening to audio.");
+      } catch (IllegalStateException | IOException ex) {
+        toast("Audio listener failed -> IllegalStateException | IOException");
+        Log.e(LOG_TAG, "Exception while initializing audio record: ", ex);
+      } catch (RuntimeException rex) {
+        toast("Audio listener failed -> RuntimeException");
+        Log.e(LOG_TAG, "Runtime Exception while initializing audio record: ", rex);
+      }
+    }else {
+      RequestPermissions();
     }
   }
 
@@ -117,9 +164,17 @@ public class home extends AppCompatActivity {
   protected void onDestroy() {
     super.onDestroy();
     handler.removeCallbacks(updater);
-    //recorder.stop();
-    recorder.reset();
-    recorder.release();
+    if (recorder != null) {
+      try {
+        recorder.stop();
+        recorder.reset();
+        recorder.release();
+        recorder = null;
+
+      } catch (IllegalStateException ex) {
+        Log.e(LOG_TAG, "Exception while releasing audio record: ", ex);
+      }
+    }
   }
 
   @Override

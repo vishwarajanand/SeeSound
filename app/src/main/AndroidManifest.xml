@@ -3,6 +3,8 @@
     package="vishwarajanand.seesound">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<!--    Not used actually, since the audio o/p is directly printed to screen and not to a file-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
