@@ -3,8 +3,6 @@
     package="vishwarajanand.seesound">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-<!--    Not used actually, since the audio o/p is directly printed to screen and not to a file-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -13,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".home"
+        <activity android:name=".HomeActivity"
+            android:exported="true"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
